@@ -8,7 +8,7 @@ const { Op } = require('sequelize');
 const Canvas = require('canvas');
 const currency = new Discord.Collection();
 const PREFIX = 'n!' && 'n';
-// const cooldowns = new Discord.Collection();
+const cooldowns = new Discord.Collection();
 const color = `9B2F2E`;
 const pasta = require('./pasta.json');
 function getRandomInt(min, max) {
@@ -72,6 +72,8 @@ function voteRemind() {
 
 require("./ExtendedMessage");
 client.on('message', async message => {
+	if (message.channel.id != (`738033863779156009`)) return;
+
 	if (message.content.toLowerCase() === `kv`) {
 		message.delete();
 	}
@@ -219,15 +221,40 @@ client.on('message', async message => {
 	} else if (command === 'rob') {
 		const target = message.mentions.users.first() || message.author;
 		const userItem = await UserItems.findOne({
-			where: { user_id: target.id, item_id: 3 },
+			where: { user_id: target.id, item_id: 1 },
 		});
 		if (userItem) {
 			message.inlineReply(`Robbery unsuccessful because victim had a fridge :pensive:`);
 		} else message.inlineReply(`Robbery successful because victim did not have a fridge <:gbTakeTheL:767155619488333885>`);
-	/* } else if (command === 'buy') {
+	} else if (command === 'buy') {
 		const item = await CurrencyShop.findOne({ where: { alias: { [Op.like]: commandArgs } } });
 		const user = await Users.findOne({ where: { user_id: message.author.id } });
 		if (!item) return message.inlineReply(`That item is invalid, please check your spelling and try again`);
+		const owned = await UserItems.findOne({
+			where: { user_id: message.author.id, item_id: item.id },
+		});
+		if (owned) return message.inlineReply(`You already own this item`)
+		if (commandArgs != `fridge`) {
+			const userItem = await UserItems.findOne({
+				where: { user_id: message.author.id, item_id: 1 },
+			});
+			if (!userItem) {
+				const noRoleEmbed = new Discord.MessageEmbed()
+					.setColor(color)
+					.setDescription(`You need a **‹🧊 · \`Fridge\`›** to purchase **‹${item.emoji} · ${item.name}›**`)
+					.setTitle(`Requires Fridge`)
+					.setThumbnail(`${message.author.displayAvatarURL({ format: "png", dynamic: true })}?size=1024`);
+				return message.inlineReply(noRoleEmbed);
+			}
+		}
+		if (!message.member.roles.cache.has(item.roleReq)) {
+			const noRoleEmbed = new Discord.MessageEmbed()
+				.setColor(color)
+				.setDescription(`You need the **<@&${item.roleReq}>** role to purchase **‹${item.emoji} · ${item.name}›**`)
+				.setTitle(`Requires Role`)
+				.setThumbnail(`${message.author.displayAvatarURL({ format: "png", dynamic: true })}?size=1024`);
+			return message.inlineReply(noRoleEmbed);
+		}
 		if (item.cost > currency.getBalance(message.author.id)) {
 			const noFundsEmbed = new Discord.MessageEmbed()
 				.setColor(color)
@@ -235,14 +262,6 @@ client.on('message', async message => {
 				.setTitle(`Insufficient Funds`)
 				.setThumbnail(`${message.author.displayAvatarURL({ format: "png", dynamic: true })}?size=1024`);
 			return message.inlineReply(noFundsEmbed);
-		}
-		if (!message.member.roles.cache.has(item.roleReq)) {
-			const noRoleEmbed = new Discord.MessageEmbed()
-				.setColor(color)
-				.setDescription(`You need the <@&${item.roleReq}> role to purchase **‹${item.emoji} · ${item.name}›**`)
-				.setTitle(`Requires Role`)
-				.setThumbnail(`${message.author.displayAvatarURL({ format: "png", dynamic: true })}?size=1024`);
-			return message.inlineReply(noRoleEmbed);
 		}
 		currency.add(message.author.id, -item.cost);
 		message.member.roles.add(item.role)
@@ -253,19 +272,21 @@ client.on('message', async message => {
 			.setThumbnail(`${message.author.displayAvatarURL({ format: "png", dynamic: true })}?size=1024`)
 			.setDescription(`Bought **‹${item.emoji} · ${item.name}›** for **‹❄️ ${item.cost} · \`Snowflake\`›**`);
 		message.inlineReply(buyEmbed);
-	*/ } else if (command === 'give') {
-		if (!message.member.roles.cache.has("806185184563167239")) {
+	} else if (command === 'give') {
+		const userItem = await UserItems.findOne({
+			where: { user_id: message.author.id, item_id: 1 },
+		});
+		if (!userItem) {
 			const noGiveEmbed = new Discord.MessageEmbed()
 				.setColor(color)
-				.setDescription(`You need the <@&806185184563167239> role to transfer **‹❄️ · \`Snowflakes\`›** to prevent possible alts`)
-				.setTitle(`Requires Role`)
+				.setDescription(`You need a **‹🧊 · \`Fridge\`›** to transfer **‹❄️ · \`Snowflakes\`›** to prevent possible alts`)
+				.setTitle(`Requires Fridge`)
 				.setThumbnail(`${message.author.displayAvatarURL({ format: "png", dynamic: true })}?size=1024`);
 			return message.inlineReply(noGiveEmbed);
 		}
 		const currentAmount = currency.getBalance(message.author.id);
 		const transferAmount = commandArgs.split(/ +/g).find(arg => !/<@!?\d+>/g.test(arg));
 		const transferTarget = message.mentions.users.first();
-		if (transferTarget.bot) return message.inlineReply(`You must mention another **user** to use this command`);
 		if (!transferAmount || isNaN(transferAmount)) return message.inlineReply(`You don't seem to know how to use this command`);
 		if (transferAmount > currentAmount) return message.inlineReply(`You only have **‹❄️ ${currentAmount} · \`Snowflake\`›**, and you can't give more than you have, dumbass`);
 		if (transferAmount <= 0) return message.inlineReply(`Please enter an amount **greater than zero**`);
@@ -288,7 +309,7 @@ client.on('message', async message => {
 			.setColor(color)
 			.setTitle('Shop')
 			.setDescription(items.map(item => `**‹${item.emoji} · ${item.name}› – ‹❄️ \`${item.cost}\`›**`).join('\n'), { code: true });
-		message.inlineReply(shopEmbed); /*
+		message.inlineReply(shopEmbed);
 	} else if (command === 'daily') {
 		if (!cooldowns.has(command)) {
 			cooldowns.set(command, new Discord.Collection());
@@ -320,8 +341,9 @@ client.on('message', async message => {
 		message.inlineReply(dailyEmbed);
 	} else if (command === 'bump') {
 		const target = message.mentions.users.first();
-		if (target.bot) return message.inlineReply(`You must mention another **user** to use this command`);
-		if (!target) return message.inlineReply('You must mention another user to use this command');
+
+		if (!target) return message.inlineReply(`You must mention another user to bump them`);
+		if (!target.bot) return message.inlineReply(`You must mention another user to bump them`);
 		if (target === message.author) return message.inlineReply('You may have outsmarted me, but I outsmarted your outsmarting!');
 		if (!cooldowns.has(command)) {
 			cooldowns.set(command, new Discord.Collection());
@@ -351,7 +373,7 @@ client.on('message', async message => {
 			.setTitle("User Bumped")
 			.setThumbnail(`${target.displayAvatarURL({ format: "png", dynamic: true })}?size=1024`)
 			.setDescription(`Both ${target} & <@${message.author.id}> have earned:\n**‹❄️ 100 · \`Snowflake\`›**\n\nYou may reuse this command every \`60 minutes\``)
-		return message.inlineReply(repEmbed); */
+		return message.inlineReply(repEmbed);
 	} else if (command === 'help') {
 		const helpEmbed = new Discord.MessageEmbed()
 			.setColor(color)
