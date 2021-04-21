@@ -76,3 +76,4 @@ typings/
 .fusebox/
 
 pasta.json
+database.sqlite

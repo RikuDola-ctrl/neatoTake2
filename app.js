@@ -287,7 +287,8 @@ client.on('message', async message => {
 		const currentAmount = currency.getBalance(message.author.id);
 		const transferAmount = commandArgs.split(/ +/g).find(arg => !/<@!?\d+>/g.test(arg));
 		const transferTarget = message.mentions.users.first();
-		if (!transferAmount || isNaN(transferAmount)) return message.inlineReply(`You don't seem to know how to use this command`);
+		if (!transferTarget || transferTarget.bot) return message.inlineReply(`You must mention another user to transfer **‹❄️ · \`Snowflakes\`›**`);
+		if (!transferAmount || isNaN(transferAmount)) return message.inlineReply(`You need to specify how many **‹❄️ · \`Snowflakes\`›** you want to transfer`);
 		if (transferAmount > currentAmount) return message.inlineReply(`You only have **‹❄️ ${currentAmount} · \`Snowflake\`›**, and you can't give more than you have, dumbass`);
 		if (transferAmount <= 0) return message.inlineReply(`Please enter an amount **greater than zero**`);
 		const amount = transferAmount * 1;
@@ -341,9 +342,8 @@ client.on('message', async message => {
 		message.inlineReply(dailyEmbed);
 	} else if (command === 'bump') {
 		const target = message.mentions.users.first();
-
 		if (!target) return message.inlineReply(`You must mention another user to bump them`);
-		if (!target.bot) return message.inlineReply(`You must mention another user to bump them`);
+		if (target.bot) return message.inlineReply(`You must mention another user to bump them`);
 		if (target === message.author) return message.inlineReply('You may have outsmarted me, but I outsmarted your outsmarting!');
 		if (!cooldowns.has(command)) {
 			cooldowns.set(command, new Discord.Collection());
