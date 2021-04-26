@@ -4,11 +4,17 @@
   "description": "neato crosstrade snow",
   "main": "app.js",
   "dependencies": {
+    "@keyv/mongo": "^1.1.0",
+    "@keyv/mysql": "^1.1.4",
+    "@keyv/postgres": "^1.0.16",
+    "@keyv/redis": "^2.1.2",
+    "@keyv/sqlite": "^2.0.2",
     "canvas": "^2.6.1",
     "discord": "^0.8.2",
     "discord.js": "github:discordjs/discord.js",
     "fs": "^0.0.1-security",
     "json": "^10.0.0",
+    "keyv": "^4.0.3",
     "sequelize": "^6.5.0",
     "sqlite": "^4.0.19",
     "sqlite3": "^5.0.2"
