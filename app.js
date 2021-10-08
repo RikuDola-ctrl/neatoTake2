@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const allIntents = Discord.Intents.ALL;
 const client = new Discord.Client({ intents: allIntents });
+
 const { UserItems, Users, CurrencyShop } = require('./dbObjects');
 const { Op } = require('sequelize');
 // const { format } = require('sequelize/types/lib/utils');
@@ -10,9 +11,6 @@ const PREFIX = 'n!' && 'n';
 const cooldowns = new Discord.Collection();
 const color = `9B2F2E`;
 const pasta = require('./pasta.json');
-const Keyv = require('keyv');
-const keyv = new Keyv('sqlite://database.sqlite');
-keyv.on('error', err => console.error('Keyv connection error:', err));
 function getRandomInt(min, max) {
 	min = Math.ceil(min);
 	max = Math.floor(max);
@@ -74,6 +72,8 @@ function voteRemind() {
 
 require("./ExtendedMessage");
 client.on('message', async message => {
+	if (message.channel.id != (`738033863779156009`)) return;
+
 	if (message.content.toLowerCase() === `kv`) {
 		message.delete();
 	}
@@ -218,14 +218,14 @@ client.on('message', async message => {
 			.setDescription(`Showing <@${target.id}>'s balance\n\n**‹❄️ ${currency.getBalance(target.id)} · \`Snowflake\`›**\n${items.map((i, position) => `**‹${i.item.emoji} · ${i.item.name}›**`).join('\n')}`)
 			.setImage(``);
 		return message.inlineReply(embed);
-	} else if (command === 'fridge') {
+	} else if (command === 'rob') {
 		const target = message.mentions.users.first() || message.author;
 		const userItem = await UserItems.findOne({
 			where: { user_id: target.id, item_id: 1 },
 		});
 		if (userItem) {
-			message.inlineReply(`User owns a fridge`);
-		} else message.inlineReply(`User does not own a fridge`);
+			message.inlineReply(`Robbery unsuccessful because victim had a fridge :pensive:`);
+		} else message.inlineReply(`Robbery successful because victim did not have a fridge <:gbTakeTheL:767155619488333885>`);
 	} else if (command === 'buy') {
 		const item = await CurrencyShop.findOne({ where: { alias: { [Op.like]: commandArgs } } });
 		const user = await Users.findOne({ where: { user_id: message.author.id } });
@@ -311,7 +311,7 @@ client.on('message', async message => {
 			.setTitle('Shop')
 			.setDescription(items.map(item => `**‹${item.emoji} · ${item.name}› – ‹❄️ \`${item.cost}\`›**`).join('\n'), { code: true });
 		message.inlineReply(shopEmbed);
-	} else if (command === 'daily') {	
+	} else if (command === 'daily') {
 		if (!cooldowns.has(command)) {
 			cooldowns.set(command, new Discord.Collection());
 		}
@@ -414,7 +414,7 @@ client.on('message', async message => {
 			.setAuthor(`Quick Stats`, `${message.guild.iconURL({ format: "png", dynamic: false })}?size=1024`)
 			.setColor(color)
 			.setThumbnail(`${client.user.displayAvatarURL({ format: "png", dynamic: true })}?size=1024`)
-			.setDescription(`**Server Owner**\n**\`${message.guild.owner.user.tag}\`**\n\n**Member Count**\n**\`${message.guild.memberCount}/1,000 Goal\`**\n\n**Uptime**\n**\`${uptime}\`**\n\n**<#736210787525460079> Message Count**\n**\`${x2}/10,000 Daily Goal\`**\n\n**Logged in at**\n**\`${client.readyAt.toString().replace(" (Eastern Standard Time)", "").replace(" (Eastern Daylight Time)", "")}\`**\n\n**Ping**\n**\`${Date.now() - message.createdTimestamp}ms/${client.ws.ping}ms\`**`);
+			.setDescription(`**Server Owner**\n**\`${message.guild.owner.user.tag}\`**\n\n**Member Count**\n**\`${message.guild.memberCount}/1,000 Goal\`**\n\n**Uptime**\n**\`${uptime}\`**\n\n**<#736210787525460079> Message Count**\n**\`${x2}/10,000 Daily Goal\`**\n\n**Logged in at**\n**\`${client.readyAt.toString().replace(" (Eastern Standard Time)", "")}\`**\n\n**Ping**\n**\`${Date.now() - message.createdTimestamp}ms/${client.ws.ping}ms\`**`);
 		return message.inlineReply(statsEmbed);
 	}
 });
