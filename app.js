@@ -120,7 +120,7 @@ client.on('message', async message => {
 	if (message.author.bot) return;
 	if (!message.guild) return;
 	if (wknd) {
-		currency.add(message.author.id, 1.5);
+		currency.add(message.author.id, 2);
 	} else {
 		currency.add(message.author.id, 1);
 	}
