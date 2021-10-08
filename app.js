@@ -1,7 +1,6 @@
 const Discord = require('discord.js');
 const allIntents = Discord.Intents.ALL;
 const client = new Discord.Client({ intents: allIntents });
-
 const { UserItems, Users, CurrencyShop } = require('./dbObjects');
 const { Op } = require('sequelize');
 // const { format } = require('sequelize/types/lib/utils');
